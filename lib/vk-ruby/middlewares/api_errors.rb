@@ -7,7 +7,8 @@ module VK
     class APIErrors < Faraday::Response::Middleware
       def call(environment)
         @app.call(environment).on_complete do |env|
-          if env.body.key?('error')
+          body = env.body.is_a?(String) ? JSON.parse(env.body) : env.body
+          if body.key?('error')
             if env.url.host == 'oauth.vk.com'
               fail VK::AuthorizationError.new(env)
             else
